@@ -92,7 +92,7 @@ fn main() {
     arg_var!(speed, 30.0, 0.0, 1000.0);
     // Animation frames per second
     arg_var!(fps, 30.0, 0.1, 600.0);
-    // Duration of model simlation in seconds (if this is less than 0, run forever)
+    // Duration of model simulation in seconds (if less than zero or not present, run forever)
     arg_var!(duration, -1.0);
 
     // Coloration gradient of the model, from its spine (`0`) to its outline (`1`)
@@ -198,12 +198,23 @@ fn main() {
     let mut last_position = 0.0;
     let mut path_range = Range::new(0.0, length_range.from);
     let mut expand_path = true;
+    let mut first_loop = true;
 
     let start_time = Instant::now();
 
     // Rendering loop
     loop {
         let time = seconds(start_time.elapsed());
+
+        if 0.0 <= duration && duration < time {
+            break;
+        }
+
+        if !first_loop {
+            // Move cursor up to enable drawing of next frame over the current one
+            print!("\x1B[{}A", height / 2);
+        }
+        first_loop = false;
 
         let position = speed * time;
 
@@ -253,18 +264,12 @@ fn main() {
         // Hide cursor while printing canvas to avoid flickering
         print!("\x1B[?25l{}\x1B[?25h\n", output);
 
-        if duration >= 0.0 && time > duration {
-            break;
-        }
-
         // Sleep to compensate for difference between rendering time and frame time
         let sleep_time = (1.0 / fps) - (seconds(start_time.elapsed()) - time);
         if sleep_time > 0.0 {
             thread::sleep(Duration::new(sleep_time.trunc() as u64, (sleep_time.fract() * 1_000_000_000.0) as u32));
         }
 
-        // Move cursor up to enable drawing of next frame over the current one
-        print!("\x1B[{}A", height / 2);
     }
 }
 
