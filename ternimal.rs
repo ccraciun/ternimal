@@ -92,8 +92,8 @@ fn main() {
     arg_var!(speed, 30.0, 0.0, 1000.0);
     // Animation frames per second
     arg_var!(fps, 30.0, 0.1, 600.0);
-    // Duration of model simulation in seconds (if less than zero or not present, run forever)
-    arg_var!(duration, -1.0);
+    // Duration of model simulation in seconds (if zero or less, or not present, run forever)
+    arg_var!(duration, 0.0);
 
     // Coloration gradient of the model, from its spine (`0`) to its outline (`1`)
     arg_var!(gradient, Gradient(vec![
@@ -206,7 +206,7 @@ fn main() {
     loop {
         let time = seconds(start_time.elapsed());
 
-        if 0.0 <= duration && duration < time {
+        if 0.0 < duration && duration < time {
             break;
         }
 
